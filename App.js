@@ -1,20 +1,23 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React from "react";
+import Routes from "./src/routes";
+import { Provider } from "react-redux";
+import store from "./src/redux/store";
+
+import { LogBox } from 'react-native';
+import _ from 'lodash';
+
+LogBox.ignoreLogs(['Setting a timer']);
+const _console = _.clone(console);
+console.warn = message => {
+  if (message.indexOf('Setting a timer') <= -1) {
+    _console.warn(message);
+  }
+};
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <Provider store={store}>
+      <Routes />
+    </Provider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
