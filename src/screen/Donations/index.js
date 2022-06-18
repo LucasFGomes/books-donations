@@ -109,7 +109,7 @@ function Donations(props) {
         Linking.openURL(url).then((data) => {
           console.log('WhatsApp Opened');
         }).catch(() => {
-          alert('Make sure WhatsApp installed on your device');
+          Alert.alert('ATENÇÃO!', 'Você precisa baixar o aplicativo WhatsApp para poder se comunicar');
         });
       } else {
         alert('Please insert message to send');

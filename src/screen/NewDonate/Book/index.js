@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import api from "../../../services/api";
-import { View, Text, Image } from "react-native";
+import { View, Text, Image, Alert } from "react-native";
 import { Camera } from "expo-camera";
 import { FontAwesome } from "@expo/vector-icons";
 import userAssets from "../../../../assets/user.png";
@@ -93,7 +93,7 @@ export default function Book(props) {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      Alert.alert('Obrigado!', 'Livro registrado com sucesso');
+      Alert.alert("Obrigado!", "Livro registrado com sucesso");
 
       setOpen(false);
       props.handleDonate(null);
