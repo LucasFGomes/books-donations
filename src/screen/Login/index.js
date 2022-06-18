@@ -38,9 +38,7 @@ export default function Login({ navigation }) {
 
     try {
       const response = await api.post('/auth/login', data)
-      Alert.alert(undefined,response.data.token)
       
-
       AsyncStorage.setItem('token', response.data.token)
       AsyncStorage.setItem('userId', String(response.data.user.id))
       AsyncStorage.setItem('nameUser', String(response.data.user.name))

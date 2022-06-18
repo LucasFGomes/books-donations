@@ -4,7 +4,7 @@ import { View, Text, Image } from "react-native";
 import { Camera } from "expo-camera";
 import { FontAwesome } from "@expo/vector-icons";
 import userAssets from "../../../../assets/user.png";
-import AsyncStorage from '@react-native-async-storage/async-storage'
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   Title,
   Title_text,
@@ -32,11 +32,11 @@ export default function Book(props) {
   const [hasPermission, setHaspermission] = useState(null);
   const camRef = useRef(null);
   const [capturedPhoto, setCapturedPhoto] = useState(null);
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
 
   useEffect(() => {
     (async () => {
-      const { status } = await Camera.requestPermissionsAsync();
+      const { status } = await Camera.requestCameraPermissionsAsync();
       setHaspermission(status === "granted");
     })();
   }, []);
@@ -51,8 +51,15 @@ export default function Book(props) {
 
   async function takePicture() {
     if (camRef) {
-      const data = await camRef.current.takePictureAsync();
-      setCapturedPhoto(data.uri);
+      // const { uri } = await camRef
+      //   .takePictureAsync()
+      //   .then(() => {
+      //     Alert.alert("takePictureCreateAlbum: taking picture");
+      //   })
+      //   .catch((error) => {
+      //     Alert.alert("takePictureCreateAlbum Error!");
+      //   });
+      setCapturedPhoto(null);
       setOpen(true);
     }
   }
@@ -71,7 +78,7 @@ export default function Book(props) {
       year,
       credit,
       url: item && item.imageLinks.thumbnail ? [item.imageLinks.thumbnail] : [],
-      user_id: userId
+      user_id: userId,
     };
 
     try {
@@ -88,17 +95,22 @@ export default function Book(props) {
 
       alert("Livro registrado com sucesso!");
 
-      setOpen(false)
-      props.handleDonate(null)
+      setOpen(false);
+      props.handleDonate(null);
     } catch (e) {
       console.log(e);
       alert(e);
     }
   }
 
+  function backScreen() {
+    props.handleDonate(null);
+    setOpen(false);
+  }
+
   return (
     <ViewCamera>
-      <Camera
+      {/* <Camera
         style={{
           flex: 1,
           height: 400,
@@ -131,88 +143,65 @@ export default function Book(props) {
         onPress={() => props.handleDonate(null)}
       >
         <Title_text>Voltar</Title_text>
-      </ButtomTouchableOpacity>
-      {capturedPhoto && (
-        <ModalPicture animationType="slide" transparent={false} visible={open}>
-          <ContainerKeyboard behavior="padding" enabled>
-            <ContainerInsideKeyboard>
-              <ViewPicture>
-                <ViewTouchableOpacity onPress={() => setOpen(false)}>
-                  <FontAwesome name="window-close" size={35} color="#ff0000" />
-                </ViewTouchableOpacity>
-                <Image
-                  style={{
-                    width: "80%",
-                    height: 300,
-                    borderRadius: 20,
-                    justifyContent: "center",
-                    alignSelf: "center",
-                  }}
-                  source={{ uri: capturedPhoto }}
-                />
-              </ViewPicture>
-              <View style={{ flex: 1, alignItems: "center" }}></View>
-              <Title>Livro</Title>
-              <ContainerBook>
-                <Text
-                  style={{
-                    marginTop: 10,
-                    marginLeft: 10,
-                    marginRight: 10,
-                    textAlign: "center",
-                    fontSize: 15,
-                    fontWeight: "500",
-                  }}
-                >
-                  {props.item.title}
-                </Text>
-                {/* <Input
-                  placeholder='título'
-                  autoCapitalize='none'
-                  autoCorrect={false}
-                  value={title}
-                  onChangeText={setTitle}
-                />
-                <Input
-                  placeholder='autor'
-                  autoCapitalize='none'
-                  autoCorrect={false}
-                  value={author}
-                  onChangeText={setAuthor}
-                />
-                <Input
-                  placeholder='ano de lançamento'
-                  autoCapitalize='none'
-                  keyboardType='numeric'
-                  autoCorrect={false}
-                  value={year}
-                  onChangeText={setYear}
-                /> */}
-                <InputTextArea
-                  placeholder="observação"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  multiline={true}
-                  numberOfLines={4}
-                  value={resume}
-                  onChangeText={setResume}
-                />
-                <Input
-                  placeholder="valor"
-                  autoCapitalize="none"
-                  keyboardType="numeric"
-                  autoCorrect={false}
-                  value={credit}
-                  onChangeText={setCredit}
-                />
-                <ButtomTouchableOpacity onPress={handleDonate}>
-                  <Title_text>Finalizar</Title_text>
-                </ButtomTouchableOpacity>
-              </ContainerBook>
-            </ContainerInsideKeyboard>
-          </ContainerKeyboard>
-        </ModalPicture>
-      )}
+      </ButtomTouchableOpacity> */}
+      <ModalPicture animationType="slide" transparent={false} visible={open}>
+        <ContainerKeyboard behavior="padding" enabled>
+          <ContainerInsideKeyboard>
+            <ViewPicture>
+              <ViewTouchableOpacity onPress={backScreen}>
+                <FontAwesome name="window-close" size={35} color="#ff0000" />
+              </ViewTouchableOpacity>
+              <Image
+                style={{
+                  width: 150,
+                  height: 200,
+                  borderRadius: 20,
+                  justifyContent: "center",
+                  alignSelf: "center",
+                  resizeMode: "stretch",
+                }}
+                source={{ uri: props.item && props.item.imageLinks.thumbnail }}
+              />
+            </ViewPicture>
+            <View style={{ flex: 1, alignItems: "center" }}></View>
+            <Title>Livro</Title>
+            <ContainerBook>
+              <Text
+                style={{
+                  marginTop: 10,
+                  marginLeft: 10,
+                  marginRight: 10,
+                  textAlign: "center",
+                  fontSize: 15,
+                  fontWeight: "500",
+                }}
+              >
+                {props.item.title}
+              </Text>
+              <InputTextArea
+                placeholder="observação"
+                autoCapitalize="none"
+                autoCorrect={false}
+                multiline={true}
+                numberOfLines={4}
+                value={resume}
+                onChangeText={setResume}
+              />
+              <Input
+                placeholder="valor"
+                autoCapitalize="none"
+                keyboardType="numeric"
+                autoCorrect={false}
+                value={credit}
+                onChangeText={setCredit}
+              />
+              <ButtomTouchableOpacity onPress={handleDonate}>
+                <Title_text>Finalizar</Title_text>
+              </ButtomTouchableOpacity>
+            </ContainerBook>
+          </ContainerInsideKeyboard>
+        </ContainerKeyboard>
+      </ModalPicture>
     </ViewCamera>
   );
 }
