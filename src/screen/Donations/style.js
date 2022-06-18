@@ -24,6 +24,16 @@ export const ViewButtons = styled.View`
   align-items: center;
 `;
 
+export const TouchableOpacityWhatsapp = styled.TouchableOpacity`
+  width: 40px;
+  height: 40px;
+  margin-right: 15px;
+  border-radius: 40px;
+  background-color: green;
+  justify-content: center;
+  align-items: center;
+`;
+
 export const TouchableOpacityCompleted = styled.TouchableOpacity`
   width: 40px;
   height: 40px;

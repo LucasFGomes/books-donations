@@ -41,15 +41,21 @@ const Card = (props) => {
                 <ContainerRight>
                     <ContainerRightUpside>
                         <View style={{ backgroundColor: '' }}>
-                            <Title>{title}</Title>
+                            <Title>{title && title.length <= 40 ? title : `${title.substring(0, 40)}...`}</Title>
                         </View>
 
                         <View style={{ backgroundColor: '' }}>
                             <Autor>{author}</Autor>
                         </View>
 
-                        <View style={{ backgroundColor: '' }}>
-                            <Points>$ {points}</Points>
+                        <View style={{ backgroundColor: '', justifyContent: 'center', flexDirection: 'row', alignSelf: 'flex-start',}}>
+                            <Icon
+                                name="loyalty"
+                                size={18}
+                                color="#000"
+                                style={{ marginRight: 5 }}
+                            /> 
+                            <Points> {points} </Points>
                         </View>
                     </ContainerRightUpside>
 

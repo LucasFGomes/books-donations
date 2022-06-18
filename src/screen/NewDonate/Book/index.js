@@ -93,7 +93,7 @@ export default function Book(props) {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      alert("Livro registrado com sucesso!");
+      Alert.alert('Obrigado!', 'Livro registrado com sucesso');
 
       setOpen(false);
       props.handleDonate(null);

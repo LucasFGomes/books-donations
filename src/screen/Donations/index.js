@@ -17,6 +17,8 @@ import {
   Alert,
   Dimensions,
   StatusBar,
+  Platform,
+  Linking
 } from "react-native";
 import { TabView, TabBar } from "react-native-tab-view";
 import { Rating, AirbnbRating } from 'react-native-ratings';
@@ -29,6 +31,7 @@ import {
   Item,
   InfoView,
   ViewButtons,
+  TouchableOpacityWhatsapp,
   TouchableOpacityCompleted,
   TouchableOpacityCancel,
 } from "./style";
@@ -94,21 +97,45 @@ function Donations(props) {
     actions.dispatchFetchDataUser();
   };
 
+  const sendWhatsApp = (item, donation) => {
+    let phone = (donation) ? item.receiver_phone : item.donor_phone;
+    phone = `55${phone}`
+    let msg = `Olá, quero conversar sobre a doação do livro: ${item.book_title}`;
+
+    let mobile = Platform.OS == 'ios' ? phone : '+' + phone;
+    if (mobile) {
+      if (msg) {
+        let url = 'whatsapp://send?1=pt_BR&text=' + msg + '&phone=' + mobile;
+        Linking.openURL(url).then((data) => {
+          console.log('WhatsApp Opened');
+        }).catch(() => {
+          alert('Make sure WhatsApp installed on your device');
+        });
+      } else {
+        alert('Please insert message to send');
+      }
+    } else {
+      alert('Please insert mobile no');
+    }
+  }
+
   const cancelDonation = async (donation) => {
     const token = await AsyncStorage.getItem("token");
-    const { donation_id, book_id } = donation;
+    const { donation_id, book_id, donor_id } = donation;
     const { actions } = props;
 
     try {
       const response = await Promise.all([
-        api.delete(`/users/books/donations/${donation_id}`, {
+        api.put(`/users/${donor_id}/donations/cancel_donation`, { donation_id }, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        api.put(`/users/books/${book_id}`),
+        api.put(`/users/${donor_id}/books/register_interest`, { book_id }, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
       ]);
 
-      if (response[0].status === 200) {
-        Alert.alert(`${response[0].data.message}`, undefined);
+      if (response[0].status === 200 || response[0].status === 204) {
+        Alert.alert('Doação cancelada com sucesso!', undefined);
         actions.dispatchFetchDonations();
         actions.dispatchFetchDataUser();
       } else {
@@ -126,20 +153,23 @@ function Donations(props) {
 
     const dataSend = {
       receiver_id,
+      donation_id,
       book_id,
       credit,
     };
 
     try {
       const response = await Promise.all([
-        api.put(`/users/${donor_id}/books/donations/${donation_id}`, dataSend, {
+        api.put(`/users/${donor_id}/donations/complete_donation`, dataSend, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        api.put(`/users/books/${book_id}/donations`),
+        api.put(`/users/${donor_id}/books/register_donation`, { book_id }, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
       ]);
 
-      if (response[0].status === 200) {
-        Alert.alert(`${response[0].data.message}`, undefined);
+      if (response[0].status === 204) {
+        Alert.alert('Obrigado!', 'Doação realizada com sucesso');
         actions.dispatchFetchDonations();
         actions.dispatchFetchDataUser();
       } else {
@@ -150,18 +180,18 @@ function Donations(props) {
     }
   };
 
-  const giveNote = async (note, donationId, ratedUserId, donor) => {
+  const giveNote = async (note, donation_id, rate_user_id, donor) => {
     const token = await AsyncStorage.getItem("token");
-    const data = { note, donationId, ratedUserId, donor };
+    const data = { note, donation_id, rate_user_id, donor };
     const { actions } = props;
 
     try {
-      const response = await api.put('/users', data, {
+      const response = await api.put('/users/give_note', data, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       if (response.status === 200) {
-        Alert.alert(undefined, `${response.data.message}`);
+        Alert.alert('Tudo certo!', 'Avaliação feita com sucesso!');
         actions.dispatchFetchDonations();
       } else {
         throw new Error('Erro ao dar nota.');
@@ -207,8 +237,28 @@ function Donations(props) {
             </Text>
           )}
         </InfoView>
+        {item.status == 'processing' && !donation && (
+          <ViewButtons>
+            <TouchableOpacityWhatsapp onPress={() => sendWhatsApp(item, donation)}>
+              <Icon
+                name="whatsapp"
+                size={25}
+                color="#ffffff"
+                style={{ padding: 2 }}
+              />
+            </TouchableOpacityWhatsapp>
+          </ViewButtons>
+        )}
         {item.status == "processing" && donation && (
           <ViewButtons>
+            <TouchableOpacityWhatsapp onPress={() => sendWhatsApp(item, donation)}>
+              <Icon
+                name="whatsapp"
+                size={25}
+                color="#ffffff"
+                style={{ padding: 2 }}
+              />
+            </TouchableOpacityWhatsapp>
             <TouchableOpacityCancel onPress={() => cancelDonation(item)}>
               <IconMaterialIcons
                 name="cancel"

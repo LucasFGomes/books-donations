@@ -60,7 +60,8 @@ export const Autor = styled.Text`
 `;
 
 export const Points = styled.Text`
-    fontSize: 11px
+    fontSize: 12px;
+
 `;
 
 export const Description = styled.Text`

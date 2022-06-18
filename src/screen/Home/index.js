@@ -71,7 +71,7 @@ export default function Login({ navigation }) {
     const token = await AsyncStorage.getItem("token");
 
     AsyncStorage.setItem("nameDonor", nameDonor);
-    AsyncStorage.setItem("donorId", donorId);
+    AsyncStorage.setItem("donorId", String(donorId));
 
     const data = {
       address: "recife",
@@ -80,45 +80,26 @@ export default function Login({ navigation }) {
       receiver_id: userId,
     };
 
-    if (points > credits) {
+    if (parseInt(points) > parseInt(credits)) {
       Alert.alert("Ops, você não tem crédito suficiente.", undefined);
     } else {
       try {
         const response = await Promise.all([
-          api.post("/users/books/donations", data, {
+          api.post(`/users/${donorId}/donations`, data, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          api.put(`/users/books/${id}`),
+          api.put(`/users/${donorId}/books/register_interest`, { book_id: id }, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
         ]);
-        alert("Pronto, o livro é quase seu");
+        Alert.alert("ATENÇÃO!", "O livro é quase seu, entre em contato com o doador");
 
         mount();
-        //Abrir Chat aqui
 
-        let keyUser = firebase.database().ref("interests").push().key;
-        firebase
-          .database()
-          .ref("interests/" + keyUser)
-          .set({
-            userId: parseInt(userId),
-            nameDonor: nameDonor,
-            donor_id: parseInt(donorId),
-          });
-
-        let keyDonor = firebase.database().ref("interests").push().key;
-        firebase
-          .database()
-          .ref("interests/" + keyDonor)
-          .set({
-            userId: parseInt(donorId),
-            nameDonor: nameUser,
-            donor_id: parseInt(userId),
-          });
-
-        navigation.navigate("ChatList");
+        navigation.navigate("Donations");
       } catch (e) {
         console.log(e);
-        alert("No momento o livro não pode ser doado, tente novamente");
+        Alert.alert("Erro", "No momento o livro não pode ser doado, tente novamente");
       }
     }
   }
@@ -160,7 +141,7 @@ export default function Login({ navigation }) {
                 title={book.title}
                 author={book.author}
                 nameDonor={book.user_name}
-                donorId={book.donor_id}
+                donorId={book.user_id}
                 points={book.credit}
                 description={book.resume}
                 rate={4.7}
